@@ -1,3 +1,6 @@
 [submodule "wortweltihr-sample"]
 	path = wortweltihr-sample
 	url = https://github.com/VerenaKasztantowicz/wortweltihr-sample
+[submodule "qmethod"]
+	path = qmethod
+	url = https://github.com/maxheld83/qmethod
