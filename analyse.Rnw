@@ -1,0 +1,69 @@
+\documentclass{article}
+
+\begin{document}
+
+<<preamb>>=
+setwd("/Users/Verena/Documents/Github/wortweltihr")
+install.packages(c("qmethod"), repos = NULL, type="source")
+library(qmethod)
+@
+
+<<import>>=
+source(file = "wortweltihr-sample/kartenmachen.R")
+q.sorts <- import.q.sorts(
+  q.sorts.dir = "qsorts/",
+  q.set = q.set,
+  q.distribution = q.distribution,
+  conditions=NULL,
+  manual.lookup=NULL
+)
+q.sorts <- q.sorts[,!colnames(q.sorts) %in% c("max","verena")]
+@
+
+<<analyse>>=
+wortweltihr <- qmethod(dataset = q.sorts, nfactors = 3, rotation = "varimax", forced = TRUE)
+wortweltihr$sd_dif
+sum(wortweltihr$f_char$characteristics$expl_var)
+@
+
+<<parallelanalyse>>=
+library(paran)
+parallelanalyse <- paran(t(q.sorts),
+  iterations=1000,
+  centile = 95,
+  quietly = FALSE,
+  status = TRUE,
+  color = TRUE
+)
+@
+
+<<visual>>=
+visualisierungwwi <- array.viz(QmethodRes = wortweltihr, extreme.labels = c("stimme nicht zu", "stimme zu"))
+visualisierungwwi$f2
+wwi.c <- import.q.concourse(q.concourse.dir = "../wortweltihr/wortweltihr-sample/wortweltihr-concourse/")
+wwi.d <- c(1, 2, 3, 5, 7, 8, 9, 8, 7, 5, 3, 2, 1)
+wwi.file <- read.csv(file = "../wortweltihr/wortweltihr-sample/sample.csv", header = FALSE)
+wwi.s <- build.q.set(q.concourse = wwi.c, q.sample = wwi.file$V1, q.distribution = wwi.d)
+wwi.q <- import.q.sorts(q.sorts.dir = "../wortweltihr/qsorts/", q.set = wwi.s, q.distribution = wwi.d)
+@
+
+<<howmany>>=
+wwi.howmany <- q.nfactors(dataset = wwi.q, cutoff = 5, siglevel = 0.95)
+wwi.howmany$screeplot
+wwi.howmany$eigenvalues
+wwi.howmany$commplot
+wwi.howmany$corr
+nrow(wwi.q)
+ncol(wwi.q)
+ncol(wwi.s)
+kable(wwi.s, col.names = c("Volltext"), format = "html")
+colnames(wwi.s) <- c("Kurzname", "Volltext")
+@
+
+<<arrayplot>>=
+wwi.res <- qmethod(dataset = wwi.q, nfactors = 2, rotation = "varimax", forced = TRUE, cor.method = "spearman")
+wwi.resplot <- array.viz(results = wwi.res, incl.qdc = TRUE)
+wwi.resplot$f2
+@
+
+\end{document}
